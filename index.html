@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZodiacAge — Daily Horoscope & Age Calculator</title>
+  <meta name="description" content="Free and accurate age calculator with zodiac sign and daily horoscope. Instantly find your exact age, star sign, days lived, and today's personalized prediction.">
+  <meta name="keywords" content="age calculator, zodiac sign, horoscope, astrology, birthday calculator, astrology tool, age finder">
+  <meta name="author" content="ZodiacAge">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+      color: #333;
+      max-width: 700px;
+      margin: auto;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background: #121212;
+      color: #f1f1f1;
+    }
+    h1 { text-align: center; }
+    input, button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      font-size: 1rem;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+      transition: background 0.3s;
+    }
+    body.dark .result {
+      background: #1e1e1e;
+      box-shadow: 0 0 10px #444;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .toggle-mode {
+      text-align: center;
+      margin-top: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #007bff;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.9em;
+      margin-top: 30px;
+      color: #777;
+    }
+    .donate {
+      background: #ffcc00;
+      color: #000;
+      padding: 10px;
+      text-align: center;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+    .zodiac-image {
+      width: 100px;
+      display: block;
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Age & Zodiac Calculator</h1>
+  <label for="dob">Enter your Date of Birth:</label>
+  <input type="date" id="dob">
+  <button onclick="calculate()">Check Age + Horoscope</button>
+  <div class="actions">
+    <button onclick="copyResult()">Copy Result</button>
+    <button onclick="shareResult()">Share</button>
+  </div>
+  <div class="result" id="output"></div>
+
+  <div class="donate">
+    ❤️ Love this tool? <a href="https://ko-fi.com" target="_blank">Support with a coffee</a>
+  </div>
+
+  <div class="toggle-mode" onclick="toggleMode()">🌙 Toggle Dark Mode</div>
+
+  <footer>
+    <p><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Use</a></p>
+    <p>&copy; 2025 ZodiacAge.com</p>
+  </footer>
+
+  <script>
+    function getZodiac(month, day) {
+      const zodiacs = [
+        ["Capricorn", 19], ["Aquarius", 18], ["Pisces", 20], ["Aries", 19],
+        ["Taurus", 20], ["Gemini", 20], ["Cancer", 22], ["Leo", 22],
+        ["Virgo", 22], ["Libra", 22], ["Scorpio", 21], ["Sagittarius", 21], ["Capricorn", 31]
+      ];
+      return (day > zodiacs[month][1]) ? zodiacs[month + 1][0] : zodiacs[month][0];
+    }
+
+    async function getHoroscope(sign) {
+      const res = await fetch(`https://aztro.sameerkumar.website/?sign=${sign.toLowerCase()}&day=today`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      return data.description;
+    }
+
+    async function calculate() {
+      const dobInput = document.getElementById('dob').value;
+      if (!dobInput) return alert("Please enter your date of birth");
+      const dob = new Date(dobInput);
+      const today = new Date();
+
+      let ageY = today.getFullYear() - dob.getFullYear();
+      let ageM = today.getMonth() - dob.getMonth();
+      let ageD = today.getDate() - dob.getDate();
+
+      if (ageD < 0) { ageM--; ageD += 30; }
+      if (ageM < 0) { ageY--; ageM += 12; }
+
+      const totalDays = Math.floor((today - dob) / (1000 * 60 * 60 * 24));
+      const zodiac = getZodiac(dob.getMonth(), dob.getDate());
+      const horoscope = await getHoroscope(zodiac);
+
+      const zodiacImg = `https://upload.wikimedia.org/wikipedia/commons/thumb/${getZodiacImgPath(zodiac)}`;
+
+      const resultText = `
+        <img class="zodiac-image" src="${zodiacImg}" alt="${zodiac} symbol">
+        <strong>Age:</strong> ${ageY} years, ${ageM} months, ${ageD} days<br>
+        <strong>Total days lived:</strong> ${totalDays}<br>
+        <strong>Zodiac sign:</strong> ${zodiac}<br>
+        <strong>Today's Horoscope:</strong> <em>${horoscope}</em>
+      `;
+
+      document.getElementById('output').innerHTML = resultText;
+    }
+
+    function getZodiacImgPath(zodiac) {
+      const zodiacPaths = {
+        Aries: "5/5a/Aries.svg/240px-Aries.svg.png",
+        Taurus: "3/3a/Taurus.svg/240px-Taurus.svg.png",
+        Gemini: "9/9b/Gemini.svg/240px-Gemini.svg.png",
+        Cancer: "0/01/Cancer.svg/240px-Cancer.svg.png",
+        Leo: "4/4f/Leo.svg/240px-Leo.svg.png",
+        Virgo: "5/5b/Virgo.svg/240px-Virgo.svg.png",
+        Libra: "f/f7/Libra.svg/240px-Libra.svg.png",
+        Scorpio: "2/29/Scorpio.svg/240px-Scorpio.svg.png",
+        Sagittarius: "4/4b/Sagittarius.svg/240px-Sagittarius.svg.png",
+        Capricorn: "7/76/Capricorn.svg/240px-Capricorn.svg.png",
+        Aquarius: "2/2e/Aquarius.svg/240px-Aquarius.svg.png",
+        Pisces: "3/3d/Pisces.svg/240px-Pisces.svg.png"
+      };
+      return zodiacPaths[zodiac] || "";
+    }
+
+    function copyResult() {
+      const text = document.getElementById('output').innerText;
+      navigator.clipboard.writeText(text);
+      alert("Result copied to clipboard!");
+    }
+
+    function shareResult() {
+      const text = document.getElementById('output').innerText;
+      if (navigator.share) {
+        navigator.share({
+          title: 'My Age & Horoscope Result',
+          text: text,
+          url: window.location.href
+        });
+      } else {
+        alert("Sharing not supported on this browser.");
+      }
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle('dark');
+    }
+  </script>
+</body>
+  </html>
