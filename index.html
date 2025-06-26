@@ -3,31 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZodiacAge — Daily Horoscope & Age Calculator</title>
-  <meta name="description" content="Free and accurate age calculator with zodiac sign and daily horoscope. Instantly find your exact age, star sign, days lived, and today's personalized prediction.">
-  <meta name="keywords" content="age calculator, zodiac sign, horoscope, astrology, birthday calculator, astrology tool, age finder">
-  <meta name="author" content="ZodiacAge">
-
+  <title>Age & Zodiac Calculator</title>
+  <meta name="description" content="Free age and zodiac calculator with daily horoscope and birthday facts.">
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f8f9fa;
+      background: #f9f9f9;
       color: #333;
       max-width: 700px;
       margin: auto;
-      transition: background 0.3s, color 0.3s;
-    }
-    body.dark {
-      background: #121212;
-      color: #f1f1f1;
-    }
-    h1 { text-align: center; }
-    input, button {
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-      font-size: 1rem;
     }
     .result {
       margin-top: 20px;
@@ -35,37 +20,7 @@
       background: #fff;
       border-radius: 10px;
       box-shadow: 0 0 10px #ccc;
-      transition: background 0.3s;
-    }
-    body.dark .result {
-      background: #1e1e1e;
-      box-shadow: 0 0 10px #444;
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .toggle-mode {
-      text-align: center;
-      margin-top: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      color: #007bff;
-    }
-    footer {
-      text-align: center;
-      font-size: 0.9em;
-      margin-top: 30px;
-      color: #777;
-    }
-    .donate {
-      background: #ffcc00;
-      color: #000;
-      padding: 10px;
-      text-align: center;
-      margin-top: 20px;
-      border-radius: 10px;
+      display: none;
     }
     .zodiac-image {
       width: 100px;
@@ -78,23 +33,9 @@
   <h1>Age & Zodiac Calculator</h1>
   <label for="dob">Enter your Date of Birth:</label>
   <input type="date" id="dob">
-  <button onclick="calculate()">Check Age + Horoscope</button>
-  <div class="actions">
-    <button onclick="copyResult()">Copy Result</button>
-    <button onclick="shareResult()">Share</button>
-  </div>
+  <button onclick="calculate()">Calculate</button>
+
   <div class="result" id="output"></div>
-
-  <div class="donate">
-    ❤️ Love this tool? <a href="https://ko-fi.com" target="_blank">Support with a coffee</a>
-  </div>
-
-  <div class="toggle-mode" onclick="toggleMode()">🌙 Toggle Dark Mode</div>
-
-  <footer>
-    <p><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Use</a></p>
-    <p>&copy; 2025 ZodiacAge.com</p>
-  </footer>
 
   <script>
     function getZodiac(month, day) {
@@ -114,38 +55,22 @@
       return data.description;
     }
 
-    async function calculate() {
-      const dobInput = document.getElementById('dob').value;
-      if (!dobInput) return alert("Please enter your date of birth");
-      const dob = new Date(dobInput);
-      const today = new Date();
+    function getChineseZodiac(year) {
+      const animals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"];
+      return animals[(year - 4) % 12];
+    }
 
-      let ageY = today.getFullYear() - dob.getFullYear();
-      let ageM = today.getMonth() - dob.getMonth();
-      let ageD = today.getDate() - dob.getDate();
+    function getDayOfWeek(date) {
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      return days[date.getDay()];
+    }
 
-      if (ageD < 0) { ageM--; ageD += 30; }
-      if (ageM < 0) { ageY--; ageM += 12; }
-
-      const totalDays = Math.floor((today - dob) / (1000 * 60 * 60 * 24));
-      const zodiac = getZodiac(dob.getMonth(), dob.getDate());
-      const horoscope = await getHoroscope(zodiac);
-
-      const zodiacImg = `https://upload.wikimedia.org/wikipedia/commons/thumb/${getZodiacImgPath(zodiac)}`;
-
-      const resultText = `
-        <img class="zodiac-image" src="${zodiacImg}" alt="${zodiac} symbol">
-        <strong>Age:</strong> ${ageY} years, ${ageM} months, ${ageD} days<br>
-        <strong>Total days lived:</strong> ${totalDays}<br>
-        <strong>Zodiac sign:</strong> ${zodiac}<br>
-        <strong>Today's Horoscope:</strong> <em>${horoscope}</em>
-      `;
-
-      document.getElementById('output').innerHTML = resultText;
+    function getSeason(month) {
+      return ["Winter", "Winter", "Spring", "Spring", "Spring", "Summer", "Summer", "Summer", "Autumn", "Autumn", "Autumn", "Winter"][month];
     }
 
     function getZodiacImgPath(zodiac) {
-      const zodiacPaths = {
+      const paths = {
         Aries: "5/5a/Aries.svg/240px-Aries.svg.png",
         Taurus: "3/3a/Taurus.svg/240px-Taurus.svg.png",
         Gemini: "9/9b/Gemini.svg/240px-Gemini.svg.png",
@@ -159,31 +84,48 @@
         Aquarius: "2/2e/Aquarius.svg/240px-Aquarius.svg.png",
         Pisces: "3/3d/Pisces.svg/240px-Pisces.svg.png"
       };
-      return zodiacPaths[zodiac] || "";
+      return paths[zodiac] || "";
     }
 
-    function copyResult() {
-      const text = document.getElementById('output').innerText;
-      navigator.clipboard.writeText(text);
-      alert("Result copied to clipboard!");
-    }
+    async function calculate() {
+      const dobInput = document.getElementById('dob').value;
+      if (!dobInput) return alert("Please enter your date of birth");
 
-    function shareResult() {
-      const text = document.getElementById('output').innerText;
-      if (navigator.share) {
-        navigator.share({
-          title: 'My Age & Horoscope Result',
-          text: text,
-          url: window.location.href
-        });
-      } else {
-        alert("Sharing not supported on this browser.");
-      }
-    }
+      const dob = new Date(dobInput);
+      const today = new Date();
 
-    function toggleMode() {
-      document.body.classList.toggle('dark');
+      let ageY = today.getFullYear() - dob.getFullYear();
+      let ageM = today.getMonth() - dob.getMonth();
+      let ageD = today.getDate() - dob.getDate();
+
+      if (ageD < 0) { ageM--; ageD += 30; }
+      if (ageM < 0) { ageY--; ageM += 12; }
+
+      const totalDays = Math.floor((today - dob) / (1000 * 60 * 60 * 24));
+      const totalWeeks = Math.floor(totalDays / 7);
+      const zodiac = getZodiac(dob.getMonth(), dob.getDate());
+      const chineseZodiac = getChineseZodiac(dob.getFullYear());
+      const season = getSeason(dob.getMonth());
+      const dayOfWeek = getDayOfWeek(dob);
+      const horoscope = await getHoroscope(zodiac);
+      const zodiacImg = `https://upload.wikimedia.org/wikipedia/commons/thumb/${getZodiacImgPath(zodiac)}`;
+
+      const resultHTML = `
+        <img class="zodiac-image" src="${zodiacImg}" alt="${zodiac} symbol">
+        <strong>Age:</strong> ${ageY} years, ${ageM} months, ${ageD} days<br>
+        <strong>Total days lived:</strong> ${totalDays}<br>
+        <strong>Total weeks lived:</strong> ${totalWeeks}<br>
+        <strong>Zodiac sign:</strong> ${zodiac}<br>
+        <strong>Chinese Zodiac:</strong> ${chineseZodiac}<br>
+        <strong>Day of Birth:</strong> ${dayOfWeek}<br>
+        <strong>Season of Birth:</strong> ${season}<br>
+        <strong>Today's Horoscope:</strong> <em>${horoscope}</em>
+      `;
+
+      const output = document.getElementById('output');
+      output.innerHTML = resultHTML;
+      output.style.display = "block";
     }
   </script>
 </body>
-  </html>
+</html>  
